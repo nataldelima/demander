@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treemap População</title>
+    <style>
+        .node {
+            border: solid 1px white;
+            font: 10px sans-serif;
+            line-height: 12px;
+            overflow: hidden;
+            position: absolute;
+            text-align: left;
+        }
+
+        .node text {
+            pointer-events: none;
+        }
+
+        .node .name {
+            font-weight: bold;
+        }
+
+        .node .value,
+        .node .percentage {
+            font-size: 0.9em;
+        }
+
+        .node .value {
+            margin-top: 5px;
+        }
+
+        .node .percentage {
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row text-center">
+            <div class="col">
+                <h1>Os 10 Países Mais Populosos do Mundo</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div id="treemap" style="width: 1000px; height: 600px; position: relative;"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        const data = {
+            "name": "root",
+            "children": [
+                { "name": "China", "value": 1457212445 },
+                { "name": "India", "value": 1457334278 },
+                { "name": "Estados Unidos", "value": 337939163 },
+                { "name": "Indonesia", "value": 282151818 },
+                { "name": "Paquistão", "value": 220614073 },
+                { "name": "Brasil", "value": 216935139 },
+                { "name": "Nigéria", "value": 222147957 },
+                { "name": "Bangladesh", "value": 174399995 },
+                { "name": "Rússia", "value": 142031856 },
+                { "name": "Japão", "value": 124256958 }
+            ]
+        };
+
+        const width = 1000;
+        const height = 600;
+
+        const treemap = d3.treemap()
+            .size([width, height])
+            .padding(1);
+
+        const root = d3.hierarchy(data)
+            .sum(d => d.value);
+
+        treemap(root);
+
+        const svg = d3.select("#treemap")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const totalValue = d3.sum(root.leaves(), d => d.value);
+
+        const nodes = svg.selectAll("g")
+            .data(root.leaves())
+            .enter()
+            .append("g")
+            .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+        nodes.append("rect")
+            .attr("id", d => d.data.name)
+            .attr("width", d => d.x1 - d.x0)
+            .attr("height", d => d.y1 - d.y0)
+            .attr("fill", (d, i) => d3.schemeCategory10[i % 10]);
+
+        nodes.append("text")
+            .attr("x", 5)
+            .attr("y", 15)
+            .attr("class", "name")
+            .text(d => d.data.name);
+
+        nodes.append("text")
+            .attr("x", 5)
+            .attr("y", 35)
+            .attr("class", "value")
+            .text(d => d.value.toLocaleString());
+
+        nodes.append("text")
+            .attr("x", 5)
+            .attr("y", 55)
+            .attr("class", "percentage")
+            .text(d => `${((d.value / totalValue) * 100).toFixed(2)}%`);
+    </script>
+
+</body>
+
+</html>
